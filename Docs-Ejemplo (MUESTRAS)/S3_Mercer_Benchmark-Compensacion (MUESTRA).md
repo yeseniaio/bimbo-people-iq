@@ -2,6 +2,13 @@
 
 **⚠️ MUESTRA FICTICIA - NO son datos reales de Grupo Bimbo. Placeholder para ilustrar el formato. Confirmar el documento real con el equipo (ver README).**
 
+> **ACTUALIZACION 21-sep-2026 - ESTA MUESTRA QUEDO SUPERADA.** Ya existen tablas REALES en el
+> workspace para el Escenario 3: **`datos_de_mercado_sueldos`** (benchmark de mercado por
+> puesto: sueldo base, efectivo garantizado, compensacion total) y
+> **`tabulador_cedulas_salariales`** (bandas internas min/medio/max, que cruzan perfecto con
+> `personas` por `nombre_categoria`). Usa esas tablas para compa-ratio y equidad; esta muestra
+> queda solo como ilustracion del formato. Ver `Track 3 - Databricks App/01. Catalogo-Tablas.md`.
+
 ==================== INICIO DE MUESTRA (CONTENIDO FICTICIO) ====================
 
 # Benchmark de Mercado - Compensacion Total (extracto ilustrativo)

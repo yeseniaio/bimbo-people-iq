@@ -64,11 +64,16 @@
 # MAGIC ## Query de ejemplo (compartida por los 3 frameworks)
 # MAGIC
 # MAGIC Solo datos **agregados** (sin PII). Filtra `scale='Likert'`.
+# MAGIC
+# MAGIC > **Otras ideas de app (dato 21-sep-2026):** compa-ratio salarial cruzando
+# MAGIC > `tbl_mth_datalake_personas` con `tabulador_cedulas_salariales` por `nombre_categoria`;
+# MAGIC > tablero de competencias con `talent_grid` (+ `dim_talent_grid`); referencia de mercado
+# MAGIC > con `datos_de_mercado_sueldos`. Ver queries validadas en `02. Notebook-Ejemplo.py`.
 # MAGIC ```sql
 # MAGIC SELECT dimention,
 # MAGIC        ROUND(100.0 * SUM(CASE WHEN favorability='Favorable' THEN 1 END) / COUNT(*), 1) AS pct_favorable,
 # MAGIC        COUNT(*) AS respuestas
-# MAGIC FROM cat_poc_sandbox_peopleai.hackaton_2026_people_ai.tbl_yr_sayit
+# MAGIC FROM cat_poc_sandbox_peopleai.hackaton_2026_people_ai.tbl_yl_sayit
 # MAGIC WHERE scale = 'Likert' AND dimention <> '' AND year = :anio
 # MAGIC GROUP BY dimention
 # MAGIC HAVING COUNT(*) >= 100
@@ -133,7 +138,7 @@
 # MAGIC         SELECT dimention,
 # MAGIC                ROUND(100.0*SUM(CASE WHEN favorability='Favorable' THEN 1 END)/COUNT(*),1) AS pct_favorable,
 # MAGIC                COUNT(*) AS respuestas
-# MAGIC         FROM {CATALOG}.{SCHEMA}.tbl_yr_sayit
+# MAGIC         FROM {CATALOG}.{SCHEMA}.tbl_yl_sayit
 # MAGIC         WHERE scale='Likert' AND dimention <> '' AND year = {anio}
 # MAGIC         GROUP BY dimention HAVING COUNT(*) >= 100
 # MAGIC         ORDER BY pct_favorable
@@ -207,7 +212,7 @@
 # MAGIC     q = f"""
 # MAGIC         SELECT dimention,
 # MAGIC                ROUND(100.0*SUM(CASE WHEN favorability='Favorable' THEN 1 END)/COUNT(*),1) AS pct_favorable
-# MAGIC         FROM {CATALOG}.{SCHEMA}.tbl_yr_sayit
+# MAGIC         FROM {CATALOG}.{SCHEMA}.tbl_yl_sayit
 # MAGIC         WHERE scale='Likert' AND dimention <> '' AND year = {anio}
 # MAGIC         GROUP BY dimention HAVING COUNT(*) >= 100 ORDER BY pct_favorable
 # MAGIC     """
@@ -289,7 +294,7 @@
 # MAGIC     q = f"""
 # MAGIC         SELECT dimention,
 # MAGIC                ROUND(100.0*SUM(CASE WHEN favorability='Favorable' THEN 1 END)/COUNT(*),1) AS pct_favorable
-# MAGIC         FROM {CATALOG}.{SCHEMA}.tbl_yr_sayit
+# MAGIC         FROM {CATALOG}.{SCHEMA}.tbl_yl_sayit
 # MAGIC         WHERE scale='Likert' AND dimention <> '' AND year = {int(anio)}
 # MAGIC         GROUP BY dimention HAVING COUNT(*) >= 100 ORDER BY pct_favorable
 # MAGIC     """

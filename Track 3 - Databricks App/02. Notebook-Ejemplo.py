@@ -7,9 +7,11 @@
 # MAGIC
 # MAGIC - **Catalogo:** `cat_poc_sandbox_peopleai`
 # MAGIC - **Schema:** `hackaton_2026_people_ai`
-# MAGIC - **Tablas:** `tbl_mth_datalake_personas`, `tbl_wkly_capacitacion`, `tbl_wkly_talento`, `tbl_yr_sayit`
+# MAGIC - **Personas/hechos:** `tbl_mth_datalake_personas`, `tbl_wkly_capacitacion`, `tbl_wkly_talento`, `tbl_yl_sayit` (80,558 filas / 1,075 personas), `talent_grid` (389)
+# MAGIC - **Referencia:** `catalogo_puestos`, `datos_de_mercado_sueldos`, `tabulador_cedulas_salariales`, `dim_talent_grid`
 # MAGIC
 # MAGIC Organizado por escenario del hackathon. Referencia de columnas: `01. Catalogo-Tablas.md`.
+# MAGIC Dato actualizado 21-sep-2026 (nuevas tablas de mercado, tabulador y talent grid).
 # MAGIC
 # MAGIC > **AVISO DE PRIVACIDAD:** `clean_name`, `email_empresa` y `salario_mensual` son
 # MAGIC > confidenciales. Agrega o anonimiza en cualquier demo. No muestres PII individual.
@@ -31,7 +33,12 @@ spark.sql(f"USE SCHEMA {SCHEMA}")
 personas    = spark.table(f"{CATALOG}.{SCHEMA}.tbl_mth_datalake_personas")
 capacitacion= spark.table(f"{CATALOG}.{SCHEMA}.tbl_wkly_capacitacion")
 talento     = spark.table(f"{CATALOG}.{SCHEMA}.tbl_wkly_talento")
-sayit       = spark.table(f"{CATALOG}.{SCHEMA}.tbl_yr_sayit")
+sayit       = spark.table(f"{CATALOG}.{SCHEMA}.tbl_yl_sayit")
+# Nuevas tablas (21-sep-2026)
+talent_grid = spark.table(f"{CATALOG}.{SCHEMA}.talent_grid")
+tabulador   = spark.table(f"{CATALOG}.{SCHEMA}.tabulador_cedulas_salariales")
+mercado     = spark.table(f"{CATALOG}.{SCHEMA}.datos_de_mercado_sueldos")
+catalogo    = spark.table(f"{CATALOG}.{SCHEMA}.catalogo_puestos")
 
 print("Tablas cargadas. Filas:")
 for name, df in [("personas", personas), ("capacitacion", capacitacion),
@@ -57,7 +64,7 @@ for name, df in [("personas", personas), ("capacitacion", capacitacion),
 # MAGIC FROM tbl_mth_datalake_personas
 # MAGIC UNION ALL SELECT 'capacitacion', COUNT(*), COUNT(DISTINCT id_usuario_sin_prefijos) FROM tbl_wkly_capacitacion
 # MAGIC UNION ALL SELECT 'talento', COUNT(*), COUNT(DISTINCT ID_Usuario_sin_prefijos) FROM tbl_wkly_talento
-# MAGIC UNION ALL SELECT 'sayit', COUNT(*), COUNT(DISTINCT participant_s_unique_identifier) FROM tbl_yr_sayit;
+# MAGIC UNION ALL SELECT 'sayit', COUNT(*), COUNT(DISTINCT participant_s_unique_identifier) FROM tbl_yl_sayit;
 
 # COMMAND ----------
 
@@ -82,7 +89,7 @@ for name, df in [("personas", personas), ("capacitacion", capacitacion),
 # MAGIC        dimention,
 # MAGIC        ROUND(100.0 * SUM(CASE WHEN favorability = 'Favorable' THEN 1 END) / COUNT(*), 1) AS pct_favorable,
 # MAGIC        COUNT(*) AS respuestas
-# MAGIC FROM tbl_yr_sayit
+# MAGIC FROM tbl_yl_sayit
 # MAGIC WHERE scale = 'Likert' AND dimention <> ''
 # MAGIC GROUP BY year, dimention
 # MAGIC ORDER BY year, pct_favorable;
@@ -98,7 +105,7 @@ for name, df in [("personas", personas), ("capacitacion", capacitacion),
 df_clima = spark.sql("""
   SELECT dimention,
          ROUND(100.0 * SUM(CASE WHEN favorability = 'Favorable' THEN 1 END) / COUNT(*), 1) AS pct_favorable
-  FROM tbl_yr_sayit
+  FROM tbl_yl_sayit
   WHERE scale = 'Likert' AND dimention <> '' AND year = 2025
   GROUP BY dimention
   HAVING COUNT(*) >= 100
@@ -127,7 +134,7 @@ plt.show()
 # MAGIC WITH clima AS (
 # MAGIC   SELECT participant_s_unique_identifier AS id,
 # MAGIC          ROUND(100.0 * SUM(CASE WHEN favorability='Favorable' THEN 1 END)/COUNT(*), 1) AS pct_fav
-# MAGIC   FROM tbl_yr_sayit WHERE scale='Likert' GROUP BY 1
+# MAGIC   FROM tbl_yl_sayit WHERE scale='Likert' GROUP BY 1
 # MAGIC ),
 # MAGIC pers AS (
 # MAGIC   SELECT ID_Usuario_sin_prefijos AS id, grupo_area_funcional,
@@ -172,8 +179,11 @@ plt.show()
 # MAGIC %md
 # MAGIC ## 4. Escenario 3 - Compensacion y categorias
 # MAGIC
-# MAGIC Categoria y plan estan **hasheados** (comparables entre si, no legibles). No hay
-# MAGIC mercado externo (Mercer): esto es **benchmark interno** de equidad y dispersion.
+# MAGIC Categoria y plan estan **hasheados** (comparables entre si, no legibles).
+# MAGIC Ahora hay 3 tablas de compensacion (21-sep-2026):
+# MAGIC - `tabulador_cedulas_salariales` (bandas internas): **cruza perfecto con personas** por `nombre_categoria` -> compa-ratio.
+# MAGIC - `datos_de_mercado_sueldos` (benchmark tipo Mercer): referencia de mercado por puesto. **No** se une directo a personas.
+# MAGIC - `catalogo_puestos`: catalogo de puestos (se une a mercado por codigo, no a personas).
 
 # COMMAND ----------
 
@@ -207,6 +217,50 @@ plt.show()
 # MAGIC HAVING COUNT(*) >= 30
 # MAGIC ORDER BY coef_variacion DESC
 # MAGIC LIMIT 15;
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Compa-ratio: salario vs banda interna (tabulador)
+# MAGIC `personas.nombre_categoria` = `tabulador.nombre_categoria` (51/51 match). compa-ratio > 1 =
+# MAGIC por arriba del punto medio de la banda; < 1 = por abajo.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC WITH ult AS (SELECT MAX(fecha_de_cierre) AS m FROM tbl_mth_datalake_personas)
+# MAGIC SELECT t.nivel_gb, p.nombre_categoria,
+# MAGIC        COUNT(*) AS n,
+# MAGIC        ROUND(AVG(p.salario_mensual)) AS salario_prom,
+# MAGIC        t.minimo, t.valor_medio, t.maximo,
+# MAGIC        ROUND(AVG(p.salario_mensual) / t.valor_medio, 2) AS compa_ratio
+# MAGIC FROM tbl_mth_datalake_personas p
+# MAGIC JOIN ult ON p.fecha_de_cierre = ult.m
+# MAGIC JOIN tabulador_cedulas_salariales t ON p.nombre_categoria = t.nombre_categoria
+# MAGIC WHERE p.active = 1 AND p.salario_mensual IS NOT NULL
+# MAGIC GROUP BY t.nivel_gb, p.nombre_categoria, t.minimo, t.valor_medio, t.maximo
+# MAGIC HAVING COUNT(*) >= 15
+# MAGIC ORDER BY compa_ratio DESC
+# MAGIC LIMIT 15;
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Referencia de mercado (datos_de_mercado_sueldos)
+# MAGIC Sueldo base de mercado por nivel de carrera. **Ojo:** es referencia; no se une directo a
+# MAGIC `personas` (no hay codigo de puesto compartido; ver Pendientes del README). Nombres de
+# MAGIC columna con espacios/acentos -> backticks.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT `Nivel de carrera` AS nivel_carrera,
+# MAGIC        ROUND(AVG(`Sueldo Base (12 Meses) Promedio_OP`)) AS sueldo_base_mercado,
+# MAGIC        ROUND(AVG(`Compensación en Efectivo Total (Target) Promedio_OP`)) AS comp_efectivo_total,
+# MAGIC        COUNT(*) AS puestos
+# MAGIC FROM datos_de_mercado_sueldos
+# MAGIC GROUP BY `Nivel de carrera`
+# MAGIC ORDER BY sueldo_base_mercado DESC;
 
 # COMMAND ----------
 
@@ -262,6 +316,43 @@ plt.show()
 # MAGIC WHERE t.`2026_Potential_Map` NOT IN ('Without Data','')
 # MAGIC GROUP BY 1
 # MAGIC ORDER BY personas DESC;
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Talent Grid: competencias y percentiles (assessment)
+# MAGIC `talent_grid` (389 personas) cruza con `personas` por `id_colaborador`. Cada atributo tiene
+# MAGIC `_sten` (1-10), `_percentil` (0-100) y `_escala`. Usa `dim_talent_grid` para etiquetar columnas.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC -- Diccionario: que significan las columnas del talent grid (por grupo)
+# MAGIC SELECT grupo_competencia, COUNT(*) AS columnas
+# MAGIC FROM dim_talent_grid
+# MAGIC GROUP BY grupo_competencia
+# MAGIC ORDER BY columnas DESC;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC -- Competencias de liderazgo mas altas (percentil) cruzando con perfil de persona
+# MAGIC WITH ult AS (SELECT MAX(fecha_de_cierre) AS m FROM tbl_mth_datalake_personas),
+# MAGIC persona AS (
+# MAGIC   SELECT id_colaborador, nivel, grupo_area_funcional
+# MAGIC   FROM tbl_mth_datalake_personas p JOIN ult ON p.fecha_de_cierre = ult.m
+# MAGIC )
+# MAGIC SELECT pe.grupo_area_funcional,
+# MAGIC        ROUND(AVG(g.strategic_mindset_percentil)) AS estrategia,
+# MAGIC        ROUND(AVG(g.drives_results_percentil))    AS resultados,
+# MAGIC        ROUND(AVG(g.decision_quality_percentil))  AS decision,
+# MAGIC        ROUND(AVG(g.builds_effective_teams_percentil)) AS equipos,
+# MAGIC        COUNT(*) AS personas
+# MAGIC FROM talent_grid g
+# MAGIC JOIN persona pe ON g.id_colaborador = pe.id_colaborador
+# MAGIC GROUP BY pe.grupo_area_funcional
+# MAGIC HAVING COUNT(*) >= 5
+# MAGIC ORDER BY estrategia DESC;
 
 # COMMAND ----------
 
@@ -334,7 +425,7 @@ plt.show()
 # MAGIC clima AS (
 # MAGIC   SELECT participant_s_unique_identifier AS id,
 # MAGIC          ROUND(100.0*SUM(CASE WHEN favorability='Favorable' THEN 1 END)/COUNT(*),1) AS pct_favorable
-# MAGIC   FROM tbl_yr_sayit WHERE scale='Likert' GROUP BY 1
+# MAGIC   FROM tbl_yl_sayit WHERE scale='Likert' GROUP BY 1
 # MAGIC )
 # MAGIC SELECT l.grupo_area_funcional, l.nivel,
 # MAGIC        COUNT(*) AS personas,
@@ -346,6 +437,42 @@ plt.show()
 # MAGIC LEFT JOIN clima c            ON l.ID_Usuario_sin_prefijos = c.id
 # MAGIC GROUP BY 1,2
 # MAGIC ORDER BY personas DESC;
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 7b. Vista `vw_sayit_personas` (clima + personas) - HOY ESTA ROTA
+# MAGIC
+# MAGIC Existe una vista `vw_sayit_personas` que cruza clima + personas por una **llave compuesta**
+# MAGIC (`id + mes + anio`), acotando personas a los cortes **Sep-2024** y **Jun-2025**. Pero su
+# MAGIC definicion aun referencia `tbl_yr_sayit`, que fue **renombrada a `tbl_yl_sayit`**, asi que
+# MAGIC `SELECT * FROM vw_sayit_personas` **falla**. Mientras se corrige la vista, replica el cruce:
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC WITH p AS (
+# MAGIC   SELECT *,
+# MAGIC          CONCAT(id_colaborador, '_',
+# MAGIC                 CASE MONTH(fecha_de_cierre) WHEN 9 THEN 'septiembre' WHEN 6 THEN 'junio' END, '_',
+# MAGIC                 CAST(YEAR(fecha_de_cierre) AS STRING)) AS llave_compuesta
+# MAGIC   FROM tbl_mth_datalake_personas
+# MAGIC   WHERE (YEAR(fecha_de_cierre)=2024 AND MONTH(fecha_de_cierre)=9)
+# MAGIC      OR (YEAR(fecha_de_cierre)=2025 AND MONTH(fecha_de_cierre)=6)
+# MAGIC ),
+# MAGIC s AS (
+# MAGIC   SELECT *,
+# MAGIC          CONCAT(participant_s_unique_identifier, '_',
+# MAGIC                 CASE WHEN year=2024 THEN 'septiembre' ELSE 'junio' END, '_',
+# MAGIC                 CAST(year AS STRING)) AS llave_compuesta
+# MAGIC   FROM tbl_yl_sayit
+# MAGIC )
+# MAGIC SELECT s.year, s.dimention, s.favorability,
+# MAGIC        p.nivel, p.grupo_area_funcional, p.generacion
+# MAGIC FROM s
+# MAGIC LEFT JOIN p ON s.llave_compuesta = p.llave_compuesta
+# MAGIC WHERE s.scale = 'Likert'
+# MAGIC LIMIT 50;
 
 # COMMAND ----------
 

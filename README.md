@@ -167,9 +167,11 @@ bimbo-people-iq/
 │
 ├── Docs-Ejemplo (MUESTRAS)/                     <- MUESTRAS ficticias (formato de documentos)
 │
+├── OBJETIVOS-VALOR.md                          <- (interno) que valor debe llevarse el negocio
 ├── NOTAS-TECNICAS.md                           <- (interno) reglas de datos + pendientes
 └── PRE-FLIGHT-CHECKLIST.md                      <- (interno) preparacion del evento
 ```
 
-> **Organizadores y coaches:** ver [NOTAS-TECNICAS.md](NOTAS-TECNICAS.md) (reglas de datos y
-> pendientes) y [PRE-FLIGHT-CHECKLIST.md](PRE-FLIGHT-CHECKLIST.md) (estado de preparacion).
+> **Organizadores y coaches:** ver [OBJETIVOS-VALOR.md](OBJETIVOS-VALOR.md) (que deben lograr los
+> usuarios de negocio), [NOTAS-TECNICAS.md](NOTAS-TECNICAS.md) (reglas de datos y pendientes) y
+> [PRE-FLIGHT-CHECKLIST.md](PRE-FLIGHT-CHECKLIST.md) (estado de preparacion).

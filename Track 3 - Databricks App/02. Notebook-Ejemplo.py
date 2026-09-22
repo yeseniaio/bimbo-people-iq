@@ -442,12 +442,12 @@ plt.show()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 7b. Vista `vw_sayit_personas` (clima + personas) - HOY ESTA ROTA
+# MAGIC ## 7b. Cruce clima + personas (reemplazo de `vw_sayit_personas`, que SERA ELIMINADA)
 # MAGIC
-# MAGIC Existe una vista `vw_sayit_personas` que cruza clima + personas por una **llave compuesta**
-# MAGIC (`id + mes + anio`), acotando personas a los cortes **Sep-2024** y **Jun-2025**. Pero su
-# MAGIC definicion aun referencia `tbl_yr_sayit`, que fue **renombrada a `tbl_yl_sayit`**, asi que
-# MAGIC `SELECT * FROM vw_sayit_personas` **falla**. Mientras se corrige la vista, replica el cruce:
+# MAGIC Existia una vista `vw_sayit_personas` que cruzaba clima + personas por una **llave compuesta**
+# MAGIC (`id + mes + anio`), acotando personas a los cortes **Sep-2024** y **Jun-2025**. **El cliente
+# MAGIC la va a eliminar** (y hoy ademas falla, porque referencia `tbl_yr_sayit`, renombrada a
+# MAGIC `tbl_yl_sayit`). **No la uses**: replica el cruce directo sobre `tbl_yl_sayit`, como abajo.
 
 # COMMAND ----------
 

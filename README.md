@@ -76,7 +76,7 @@ Dataset **100% simulado (ficticio)** de People / RRHH. **9 tablas** + **1 vista*
 | `tabulador_cedulas_salariales` | 51 | Bandas salariales internas (minimo/medio/maximo) por categoria |
 | `dim_talent_grid` | 203 | Diccionario del `talent_grid` |
 
-Ademas la vista `vw_sayit_personas` (clima + personas). **Nota: hoy esta rota** — ver pendientes.
+Ademas existia la vista `vw_sayit_personas` (clima + personas), pero **el cliente la va a eliminar** — no la uses; replica el cruce sobre `tbl_yl_sayit` (ver pendientes).
 
 **Llaves de union principales:** tablas de persona por `ID_Usuario_sin_prefijos` (LEFT JOIN, traslape parcial); `talent_grid` por `id_colaborador`; `tabulador` por `nombre_categoria` (match perfecto). El dato de **mercado/catalogo NO se une directo a personas** (referencia).
 
@@ -246,9 +246,10 @@ existe una tabla puente puesto↔codigo, o se compara solo via `nombre_categoria
   talent_grid 389, contra 2,059 en personas. &nbsp;➜ *Confirmar si es esperado.*
 
 ### 4. Calidad de dato a validar
-- **Vista `vw_sayit_personas` ROTA:** su definicion referencia `tbl_yr_sayit`, que fue
-  **renombrada a `tbl_yl_sayit`**. Hoy la vista falla al consultarse. &nbsp;➜ *Actualizar la
-  definicion de la vista al nuevo nombre.*
+- **Vista `vw_sayit_personas` SERA ELIMINADA:** el cliente confirmo que la va a **eliminar**
+  (hoy ademas falla, porque referencia `tbl_yr_sayit`, renombrada a `tbl_yl_sayit`). &nbsp;➜ *No
+  la uses en tu solucion; si necesitas clima + personas, replica el cruce por llave compuesta
+  (id + mes + anio) directo sobre `tbl_yl_sayit` (ver notebook Track 3).*
 - **Comentario de `tbl_yl_sayit` desactualizado:** dice "37.080 filas / 387 personas"; el
   conteo real es **80,558 / 1,075**. &nbsp;➜ *Corregir el comentario de la tabla.*
 - **`tbl_yl_sayit`:** persiste la desalineacion de columnas en preguntas de texto abierto.

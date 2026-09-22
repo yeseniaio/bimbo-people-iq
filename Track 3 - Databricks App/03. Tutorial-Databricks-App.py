@@ -15,9 +15,10 @@
 # MAGIC - **Catalogo:** `cat_poc_sandbox_peopleai` / **Schema:** `hackaton_2026_people_ai`
 # MAGIC - **Datos:** ver `01. Catalogo-Tablas.md`. Query base validada: % Favorable por dimension.
 # MAGIC
-# MAGIC > **AVISO:** la app corre con un **service principal** (no con tu usuario). Da acceso a
-# MAGIC > la tabla al SP de la app en Unity Catalog. **No expongas PII** (`clean_name`,
-# MAGIC > `email_empresa`, `salario_mensual`): consulta siempre datos **agregados**.
+# MAGIC > **AVISO:** el dato es **100% simulado** (ficticio, no real). La app corre con un
+# MAGIC > **service principal** (no con tu usuario); da acceso a la tabla al SP en Unity Catalog.
+# MAGIC > Buena practica: aunque `clean_name`/`email_empresa`/`salario_mensual` son simulados,
+# MAGIC > consulta y muestra siempre datos **agregados** (en produccion serian PII real).
 
 # COMMAND ----------
 

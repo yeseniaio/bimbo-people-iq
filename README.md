@@ -7,8 +7,14 @@ aplicado a los datos de **People / Recursos Humanos**.
 
 **Fecha:** 23-24 de septiembre de 2026
 **Plataforma:** Databricks Workspace (Sandbox) `https://adb-709692038187649.9.azuredatabricks.net`
-**Datos:** People / RRHH de Grupo Bimbo (reales, pseudonimizados) - Personas, Capacitacion, Talento y Clima "Say It"
+**Datos:** People / RRHH - **100% SIMULADOS (ficticios)** - Personas, Capacitacion, Talento y Clima "Say It"
 **Objetivo del dia:** Demo funcional + presentacion (~30 min de armado, 3 min de pitch)
+
+> ⚠️ **DATOS 100% SIMULADOS.** Todo el dato de este hackathon es **ficticio/simulado** — **NO es
+> informacion real de Grupo Bimbo**. Los nombres (`clean_name`) **no son reales**, los correos
+> (`email_empresa`) son **simulados** y los salarios (`salario_mensual`) estan **completamente
+> simulados**. Categorias, planes, sitios y organizaciones vienen codificados. Nada representa
+> a personas, correos ni remuneraciones reales.
 
 ---
 
@@ -47,7 +53,7 @@ Detalle completo de cada escenario en **[00. Casos-de-uso.md](00.%20Casos-de-uso
 
 ## Los Datos
 
-Extracto **real y pseudonimizado** de People / RRHH de Grupo Bimbo. **9 tablas** + **1 vista** + **1 volumen** (actualizado 21-sep-2026).
+Dataset **100% simulado (ficticio)** de People / RRHH. **9 tablas** + **1 vista** + **1 volumen** (actualizado 21-sep-2026). No es dato real de Grupo Bimbo.
 
 **Catalogo:** `cat_poc_sandbox_peopleai` &nbsp;&nbsp; **Schema:** `hackaton_2026_people_ai`
 
@@ -74,9 +80,11 @@ Ademas la vista `vw_sayit_personas` (clima + personas). **Nota: hoy esta rota** 
 
 **Llaves de union principales:** tablas de persona por `ID_Usuario_sin_prefijos` (LEFT JOIN, traslape parcial); `talent_grid` por `id_colaborador`; `tabulador` por `nombre_categoria` (match perfecto). El dato de **mercado/catalogo NO se une directo a personas** (referencia).
 
-> **AVISO DE PRIVACIDAD:** el dato conserva `clean_name`, `email_empresa` y `salario_mensual`.
-> Tratalo como **confidencial**: agrega o anonimiza en cualquier demo. Compensacion, sitios
-> y organizaciones ya vienen hasheados.
+> **AVISO - DATOS SIMULADOS:** `clean_name`, `email_empresa` y `salario_mensual` son
+> **ficticios** (nombres inventados, correos simulados, salarios completamente simulados);
+> compensacion, sitios y organizaciones vienen codificados. No corresponden a personas reales,
+> asi que no hay dato personal real que proteger. Aun asi, como buena practica de demo,
+> presenta metricas agregadas en vez de filas individuales.
 
 Referencia tecnica completa (columnas, tipos, queries validados, JOINs): **[Track 3/01. Catalogo-Tablas.md](Track%203%20-%20Databricks%20App/01.%20Catalogo-Tablas.md)**.
 

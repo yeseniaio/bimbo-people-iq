@@ -13,8 +13,9 @@
 # MAGIC Organizado por escenario del hackathon. Referencia de columnas: `01. Catalogo-Tablas.md`.
 # MAGIC Dato actualizado 21-sep-2026 (nuevas tablas de mercado, tabulador y talent grid).
 # MAGIC
-# MAGIC > **AVISO DE PRIVACIDAD:** `clean_name`, `email_empresa` y `salario_mensual` son
-# MAGIC > confidenciales. Agrega o anonimiza en cualquier demo. No muestres PII individual.
+# MAGIC > ⚠️ **DATOS 100% SIMULADOS:** todo es ficticio (no real). `clean_name`, `email_empresa` y
+# MAGIC > `salario_mensual` son nombres/correos/salarios simulados, no de personas reales. Aun asi,
+# MAGIC > en demos muestra metricas agregadas en vez de filas individuales.
 
 # COMMAND ----------
 
@@ -523,4 +524,4 @@ display(
 # MAGIC - **Track 2 (AI/BI):** convierte estas queries en datasets del dashboard.
 # MAGIC - **Track 3 (App):** ver `03. Tutorial-Databricks-App.py` para exponerlas en una app.
 # MAGIC
-# MAGIC Recuerda: agrega/anonimiza PII, filtra `scale='Likert'` en clima, y normaliza etiquetas.
+# MAGIC Recuerda: el dato es simulado (presenta agregados, no filas individuales), filtra `scale='Likert'` en clima, y normaliza etiquetas.

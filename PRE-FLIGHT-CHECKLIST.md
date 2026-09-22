@@ -12,10 +12,16 @@ Lista de verificacion para que el evento **corra sin friccion**. Marca cada item
 (Track 2)**; solo **1-2 equipos** haran **Databricks Apps (Track 3)**. La checklist prioriza en
 consecuencia. Con solo 5 equipos, la carga sobre el warehouse es **baja** (ver seccion D).
 
-**Estado general:** Infraestructura ✅ lista. **Acceso ✅** (participantes en el grupo) y
-**Genie ✅** (probado por el cliente). Con solo **5 equipos**, la concurrencia del warehouse
-**deja de ser un riesgo**. Los pendientes reales son: **limpieza de dato (cliente: vista,
-sayit)** y el **grant de SP** solo para los 1-2 equipos de Track 3.
+**Estado general:** Infraestructura ✅. **Acceso ✅** (participantes en el grupo). **Genie ✅**
+(probado por el cliente). Concurrencia ✅ (solo 5 equipos). Grants de SP ✅ (los crea el
+organizador on-demand). Documentos Ask HR / Carpeta Azul ✅ (se resuelven el dia del evento).
+**Unico pendiente abierto: la correccion de `sayit.csv` + eliminacion de la vista (cliente, en
+curso).**
+
+> ⚠️ **PARA PREGUNTAR MANANA (al cliente):**
+> 1. `sayit.csv` — ?quedo la correccion de las 1,328 filas desalineadas (reexport con comillas o
+>    Parquet)? Y de paso, el comentario de `tbl_yl_sayit` (80,558 / 1,075).
+> 2. `vw_sayit_personas` — ?ya la eliminaron?
 
 Owners: **[C]** Cliente/dato &nbsp; **[O]** Organizador &nbsp; **[DBX]** Equipo Databricks &nbsp; **[E]** Equipos participantes
 Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
@@ -62,27 +68,30 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
 
 ## E. Bloqueadores de dato (limpieza - cliente)
 
-- [ ] 🔴 **[C]** **Eliminar la vista `vw_sayit_personas`.** Hoy falla
-  (`UC_DEPENDENCY_DOES_NOT_EXIST`) porque referencia una tabla renombrada. El cliente confirmo
-  que la va a eliminar. La doc ya enruta a los equipos a un cruce de reemplazo sobre
-  `tbl_yl_sayit`, asi que eliminarla evita que alguien tropiece.
-- [ ] 🟠 **[C]** **Reexportar `sayit.csv` con comillas (RFC-4180) o como Parquet/Delta.**
-  **1,328 de 80,558** filas tienen columnas desalineadas (comas en texto libre). Ver el pedido
-  listo para enviar en la seccion H. Interino: filtrar `scale = 'Likert'`.
-- [ ] 🟡 **[C]** **Corregir el comentario de `tbl_yl_sayit`** en Unity Catalog: dice
-  "37,080 filas / 387 personas"; el real es **80,558 / 1,075**.
-- [ ] 🟡 **[C]** Definir escenarios que dependen de **documentos** (Ask HR, Carpeta Azul): hoy el
-  volumen solo tiene CSV. Decidir si se cargan documentos o se acota el alcance (Vector Search y
-  embeddings ya estan listos si llegan los documentos).
+- [ ] 🔴 **[C]** **Eliminar la vista `vw_sayit_personas`.** ✅ *El cliente confirmo que la va a
+  eliminar.* Hoy falla (`UC_DEPENDENCY_DOES_NOT_EXIST`) porque referencia una tabla renombrada.
+  La doc ya enruta a los equipos a un cruce de reemplazo sobre `tbl_yl_sayit`. **Solo falta
+  ejecutar la eliminacion** — confirmar que ya quedo antes del evento.
+- [ ] 🟠 **[C]** **Corregir `sayit.csv`** (columnas desalineadas: **1,328 de 80,558** filas por
+  comas en texto libre). 🔄 *El cliente ya esta trabajando en la correccion.* &nbsp;➜ **PREGUNTAR
+  MANANA:** confirmar avance y si el reexport (con comillas RFC-4180 o Parquet/Delta) quedara
+  listo antes del evento. Interino: filtrar `scale = 'Likert'`. Pedido en la seccion H.
+- [ ] 🟡 **[C]** **Corregir el comentario de `tbl_yl_sayit`** en Unity Catalog (dice "37,080 /
+  387"; real **80,558 / 1,075**). Puede ir junto con la correccion del CSV.
+- [x] 🟢 **[O]** **Documentos Ask HR (Esc. 1) y Carpeta Azul (Esc. 5): se resuelven el DIA del
+  evento.** Decision tomada: se aportaran/decidiran on-demand en el hackathon (no bloquean el
+  arranque). Vector Search y embeddings ya estan listos para indexar cuando lleguen los
+  documentos; los equipos de esos escenarios trabajan la parte estructurada mientras tanto.
 
 ## F. Databricks Apps (Track 3 - solo 1-2 de los 5 equipos: on-demand)
 
 > Solo aplica a los 1-2 equipos que elijan Track 3. Atender **cuando** un equipo lo pida, no para todos.
 
-- [ ] 🟠 **[DBX]** Por cada app creada: otorgar a su **service principal** (las apps NO corren
-  como el usuario) `USE_CATALOG` + `USE_SCHEMA` + `SELECT` sobre
-  `cat_poc_sandbox_peopleai.hackaton_2026_people_ai`. **Sin esto la app no lee dato** (falla
-  silenciosa mas comun de Track 3).
+- [x] 🟢 **[O]** **Grants de service principal: los creare on-demand.** ✅ Plan confirmado: cuando
+  un equipo despliegue una app, el organizador otorga a su **SP** (las apps NO corren como el
+  usuario) `USE_CATALOG` + `USE_SCHEMA` + `SELECT` sobre
+  `cat_poc_sandbox_peopleai.hackaton_2026_people_ai`. Sin esto la app no lee dato.
+  - Comando de referencia: `databricks grants update schema cat_poc_sandbox_peopleai.hackaton_2026_people_ai --json '{"changes":[{"principal":"<APP_SP>","add":["USE_SCHEMA","SELECT"]}]}' --profile sandbox_gb` (mas `USE_CATALOG` a nivel catalogo).
 - [ ] 🟡 **[E]** Usar el `03. Tutorial-Databricks-App.py` (Streamlit/Dash/Gradio) con el
   `app.yaml` y `requirements.txt` incluidos.
 - [ ] 🟡 **[DBX]** Confirmar cuota para crear apps nuevas (el workspace ya tiene ~59 apps).

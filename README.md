@@ -217,21 +217,19 @@ bimbo-people-iq/
   `id_colaborador`) + su diccionario `dim_talent_grid` habilitan analisis de competencias,
   traits, drivers y risk factors.
 
-### 1. Documentos no estructurados AUN NO existen en el dato
-El volumen contiene **solo CSV de origen** (incluido el nuevo `tabulador...csv`). Sigue sin
-haber politicas, correos, SharePoint, PDFs ni documentos institucionales. Afecta:
+### 1. Documentos no estructurados: se resuelven el DIA del evento
+El volumen contiene **solo CSV de origen**. Los escenarios que dependen de documentos se
+atenderan **on-demand durante el hackathon** (decision tomada), no antes:
 
-- **Escenario 1 (Biblioteca Virtual / Ask HR):** el reto describe "correos, SharePoint,
-  archivos locales, repositorios". **Nada de eso esta cargado.** &nbsp;➜ *Confirmar: el
-  equipo aportara un set de documentos (PDF/DOCX/MD) para cargar al volumen? Cuales y de
-  donde?*
-- **Escenario 5 (Sucesion) — "Carpeta Azul":** la documentacion estrategica de sucesion
-  **no esta en el volumen** (aunque el dato estructurado de sucesion mejoro con `talent_grid`).
-  &nbsp;➜ *Confirmar: se cargara la Carpeta Azul? En que formato?*
+- **Escenario 1 (Biblioteca Virtual / Ask HR):** los documentos (correos, SharePoint, PDFs) se
+  aportaran/definiran **el dia del evento**.
+- **Escenario 5 (Sucesion) — "Carpeta Azul":** la documentacion estrategica de sucesion se
+  aportara/definira **el dia del evento** (el dato estructurado de sucesion ya mejoro con
+  `talent_grid`).
 
-Mientras tanto, cada guia resuelve la parte **estructurada** del escenario, y
-`Docs-Ejemplo (MUESTRAS)/` muestra como se veria un documento fuente para que, si llega el
-dato real, el flujo ya este listo (subir a volumen ➜ `ai_parse_document` ➜ Vector Search / Genie).
+El flujo esta listo para cuando lleguen: subir a volumen ➜ `ai_parse_document` ➜ Vector Search /
+Genie (Vector Search y embeddings ya operativos). Mientras tanto, cada guia resuelve la parte
+**estructurada** del escenario, y `Docs-Ejemplo (MUESTRAS)/` muestra el formato de un documento fuente.
 
 ### 2. Dato de mercado/catalogo NO se une directo a la plantilla
 `datos_de_mercado_sueldos` y `catalogo_puestos` se cruzan entre si por codigo de puesto, pero
@@ -245,15 +243,14 @@ existe una tabla puente puesto↔codigo, o se compara solo via `nombre_categoria
 - **Cobertura parcial entre tablas:** Say It cubre 1,075 personas, capacitacion 1,274,
   talent_grid 389, contra 2,059 en personas. &nbsp;➜ *Confirmar si es esperado.*
 
-### 4. Calidad de dato a validar
-- **Vista `vw_sayit_personas` SERA ELIMINADA:** el cliente confirmo que la va a **eliminar**
-  (hoy ademas falla, porque referencia `tbl_yr_sayit`, renombrada a `tbl_yl_sayit`). &nbsp;➜ *No
-  la uses en tu solucion; si necesitas clima + personas, replica el cruce por llave compuesta
-  (id + mes + anio) directo sobre `tbl_yl_sayit` (ver notebook Track 3).*
-- **Comentario de `tbl_yl_sayit` desactualizado:** dice "37.080 filas / 387 personas"; el
-  conteo real es **80,558 / 1,075**. &nbsp;➜ *Corregir el comentario de la tabla.*
-- **`tbl_yl_sayit`:** persiste la desalineacion de columnas en preguntas de texto abierto.
-  &nbsp;➜ *Recargar el CSV con comillas/escape correctos? (por ahora, filtrar `scale='Likert'`).*
+### 4. Calidad de dato (cliente en curso - ver Pre-Flight)
+- **Vista `vw_sayit_personas`:** el cliente la **va a eliminar** (confirmado; en curso). Hoy
+  falla porque referencia `tbl_yr_sayit`. &nbsp;➜ *No la uses; replica el cruce por llave
+  compuesta (id + mes + anio) sobre `tbl_yl_sayit` (ver notebook Track 3).*
+- **`tbl_yl_sayit` — correccion en curso:** el cliente **ya esta trabajando** en corregir la
+  desalineacion de columnas (1,328 de 80,558 filas por comas en texto libre) y el comentario
+  desactualizado ("37.080 / 387" → real **80,558 / 1,075**). &nbsp;➜ *Confirmar avance el dia
+  previo (ver `PRE-FLIGHT-CHECKLIST.md`). Interino: filtrar `scale='Likert'`.*
 - **Etiquetas inconsistentes** de desempenio/potencial/readiness entre anios, sistemas y
   tablas. &nbsp;➜ *Existe un diccionario/mapeo oficial para normalizarlas?*
 - **9-box y talento mayormente `Without Data`.** &nbsp;➜ *Se cargara la evaluacion completa

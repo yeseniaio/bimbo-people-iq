@@ -7,14 +7,15 @@ Lista de verificacion para que el evento **corra sin friccion**. Marca cada item
 **Datos:** `cat_poc_sandbox_peopleai.hackaton_2026_people_ai` (9 tablas, **100% simuladas**)
 **Ultima verificacion:** 21-sep-2026
 
-**Uso esperado:** la mayoria de los equipos usara **Genie (Track 1)** y **AI/BI Dashboards
-(Track 2)**; solo **un par de equipos** haran **Databricks Apps (Track 3)**. La checklist
-prioriza en consecuencia.
+**Escala:** **5 equipos x 5 personas = 25 participantes.**
+**Uso esperado:** la mayoria de los 5 equipos usara **Genie (Track 1)** y **AI/BI Dashboards
+(Track 2)**; solo **1-2 equipos** haran **Databricks Apps (Track 3)**. La checklist prioriza en
+consecuencia. Con solo 5 equipos, la carga sobre el warehouse es **baja** (ver seccion D).
 
 **Estado general:** Infraestructura ✅ lista. **Acceso ✅** (participantes en el grupo) y
-**Genie ✅** (probado por el cliente). Los pendientes restantes son: **limpieza de dato (cliente:
-vista, sayit)**, **concurrencia del warehouse** para Genie+dashboards, y el **grant de SP** solo
-para los pocos equipos de Track 3.
+**Genie ✅** (probado por el cliente). Con solo **5 equipos**, la concurrencia del warehouse
+**deja de ser un riesgo**. Los pendientes reales son: **limpieza de dato (cliente: vista,
+sayit)** y el **grant de SP** solo para los 1-2 equipos de Track 3.
 
 Owners: **[C]** Cliente/dato &nbsp; **[O]** Organizador &nbsp; **[DBX]** Equipo Databricks &nbsp; **[E]** Equipos participantes
 Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
@@ -48,14 +49,16 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
 - [ ] 🟠 **[O]** Confirmar que pueden **publicar/compartir** el dashboard (para la demo en vivo).
 - [ ] 🟡 **[O]** Tener 1 dashboard de demo (escenario 2: clima + rotacion).
 
-## D. Warehouse y concurrencia (afecta a Genie + AI/BI = casi todos)
+## D. Warehouse (riesgo BAJO con 5 equipos)
 
-- [ ] 🔴 **[O/DBX]** Como Genie y dashboards comparten warehouse y habra ~30 equipos, revisar
-  **auto-scaling / max clusters** de `CBHackaton_IAPeople`. Un 2X-Small puede **encolar** con
-  mucha concurrencia. Opciones: subir tamanio, subir max clusters, o **repartir** equipos entre
-  los otros warehouses serverless que ya existen.
-- [ ] 🟡 **[O]** El warehouse es **serverless** (arranca en segundos); no hace falta dejarlo
-  prendido, pero puedes pre-calentarlo antes de arrancar.
+- [ ] 🟡 **[O/DBX]** Con **5 equipos** compartiendo `CBHackaton_IAPeople` (serverless, 2X-Small),
+  la concurrencia **no es problema** y el dato es chico. No hace falta subir tamanio. Solo
+  confirmar que el warehouse **arranca** (serverless: en segundos) y, si acaso, dejar el
+  auto-scaling en >=2 clusters por si varios equipos consultan a la vez.
+- [ ] 🟡 **[O]** Opcional: **pre-calentar** el warehouse (una query) justo antes de arrancar para
+  que la primera experiencia sea instantanea.
+- [ ] 🟡 **[O]** Existen otros warehouses serverless por si quieres dar uno dedicado a un equipo
+  pesado; con 5 equipos normalmente no es necesario.
 
 ## E. Bloqueadores de dato (limpieza - cliente)
 
@@ -72,9 +75,9 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
   volumen solo tiene CSV. Decidir si se cargan documentos o se acota el alcance (Vector Search y
   embeddings ya estan listos si llegan los documentos).
 
-## F. Databricks Apps (Track 3 - solo un par de equipos: on-demand)
+## F. Databricks Apps (Track 3 - solo 1-2 de los 5 equipos: on-demand)
 
-> Solo aplica a los equipos que elijan Track 3. Atender **cuando** un equipo lo pida, no para todos.
+> Solo aplica a los 1-2 equipos que elijan Track 3. Atender **cuando** un equipo lo pida, no para todos.
 
 - [ ] 🟠 **[DBX]** Por cada app creada: otorgar a su **service principal** (las apps NO corren
   como el usuario) `USE_CATALOG` + `USE_SCHEMA` + `SELECT` sobre

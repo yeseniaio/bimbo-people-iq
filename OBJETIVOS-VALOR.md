@@ -1,7 +1,7 @@
 # Objetivos de Valor - Que deben lograr los usuarios de negocio
 
 Checklist de **requisitos de exito** del hackathon desde la optica de negocio: que un usuario de
-People / RRHH (no tecnico) **entienda y viva el valor de la plataforma Databricks**. No es una
+People / Personas (no tecnico) **entienda y viva el valor de la plataforma Databricks**. No es una
 lista de infraestructura (esa esta en `PRE-FLIGHT-CHECKLIST.md`); es la lista de **resultados**.
 
 **Definicion de exito:** al cierre, cada participante de negocio puede decir *"le pregunte a mis
@@ -41,6 +41,8 @@ Prioridad: 🔴 imprescindible &nbsp; 🟠 importante &nbsp; 🟡 deseable
   informacion entre herramientas."*
 - [ ] 🟠 **IA generativa aplicada a People** = *"puedo resumir, clasificar y recomendar sobre
   informacion de personas"* (ai_query, Ask HR).
+- [ ] 🟡 **Knowledge Assistant (Agent Bricks)** = *"pregunto a mis documentos y me responde con
+  citas, sin codigo"* (Track 4 opcional; solo si hay documentos / dato no estructurado).
 
 ## C. Valor de negocio por escenario (que problema real resuelve)
 

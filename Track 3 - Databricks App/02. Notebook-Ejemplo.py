@@ -2,16 +2,15 @@
 # MAGIC %md
 # MAGIC # Notebook de Ejemplo - People AI Hackathon
 # MAGIC
-# MAGIC Queries SQL y PySpark listos para ejecutar sobre los datos de People / RRHH.
+# MAGIC Queries SQL y PySpark listos para ejecutar sobre los datos de People / Personas.
 # MAGIC Todas las queries de este notebook fueron **validadas** contra el workspace.
 # MAGIC
 # MAGIC - **Catalogo:** `cat_poc_sandbox_peopleai`
 # MAGIC - **Schema:** `hackaton_2026_people_ai`
-# MAGIC - **Personas/hechos:** `tbl_mth_datalake_personas`, `tbl_wkly_capacitacion`, `tbl_wkly_talento`, `tbl_yl_sayit` (80,558 filas / 1,075 personas), `talent_grid` (389)
-# MAGIC - **Referencia:** `catalogo_puestos`, `datos_de_mercado_sueldos`, `tabulador_cedulas_salariales`, `dim_talent_grid`
+# MAGIC - **Personas/hechos:** `tbl_mth_datalake_personas`, `tbl_wkly_capacitacion`, `tbl_wkly_talento`, `tbl_yl_sayit` (76,520 filas / 1,072 personas), `talent_grid` (389)
+# MAGIC - **Referencia:** `catalogo_puestos`, `datos_de_mercado_sueldos`, `tabulador_cedulas_salariales`, `dim_talent_grid`, `perfiles_puesto_sucesion` (16)
 # MAGIC
 # MAGIC Organizado por escenario del hackathon. Referencia de columnas: `01. Catalogo-Tablas.md`.
-# MAGIC Dato actualizado 21-sep-2026 (nuevas tablas de mercado, tabulador y talent grid).
 # MAGIC
 # MAGIC > ⚠️ **DATOS 100% SIMULADOS:** todo es ficticio (no real). `clean_name`, `email_empresa` y
 # MAGIC > `salario_mensual` son nombres/correos/salarios simulados, no de personas reales. Aun asi,
@@ -35,11 +34,13 @@ personas    = spark.table(f"{CATALOG}.{SCHEMA}.tbl_mth_datalake_personas")
 capacitacion= spark.table(f"{CATALOG}.{SCHEMA}.tbl_wkly_capacitacion")
 talento     = spark.table(f"{CATALOG}.{SCHEMA}.tbl_wkly_talento")
 sayit       = spark.table(f"{CATALOG}.{SCHEMA}.tbl_yl_sayit")
-# Nuevas tablas (21-sep-2026)
+# Tablas de referencia
 talent_grid = spark.table(f"{CATALOG}.{SCHEMA}.talent_grid")
 tabulador   = spark.table(f"{CATALOG}.{SCHEMA}.tabulador_cedulas_salariales")
 mercado     = spark.table(f"{CATALOG}.{SCHEMA}.datos_de_mercado_sueldos")
 catalogo    = spark.table(f"{CATALOG}.{SCHEMA}.catalogo_puestos")
+# Perfiles de exito de roles criticos (perfil objetivo de sucesion)
+perfiles    = spark.table(f"{CATALOG}.{SCHEMA}.perfiles_puesto_sucesion")
 
 print("Tablas cargadas. Filas:")
 for name, df in [("personas", personas), ("capacitacion", capacitacion),
@@ -53,7 +54,7 @@ for name, df in [("personas", personas), ("capacitacion", capacitacion),
 # MAGIC
 # MAGIC Reglas clave del dato:
 # MAGIC - `personas` es **mensual**: filtra por `MAX(fecha_de_cierre)` para el estado actual.
-# MAGIC - `sayit` limpio: filtra `scale = 'Likert'` (el texto abierto trae columnas desalineadas).
+# MAGIC - `sayit` limpio: filtra `scale = 'Likert'` (preguntas de escala).
 # MAGIC - Talento/9-box: excluye `'Without Data'` y `''`.
 # MAGIC - Llave entre tablas: `ID_Usuario_sin_prefijos` (traslape parcial, usa LEFT JOIN).
 
@@ -181,7 +182,7 @@ plt.show()
 # MAGIC ## 4. Escenario 3 - Compensacion y categorias
 # MAGIC
 # MAGIC Categoria y plan estan **hasheados** (comparables entre si, no legibles).
-# MAGIC Ahora hay 3 tablas de compensacion (21-sep-2026):
+# MAGIC Hay 3 tablas de compensacion:
 # MAGIC - `tabulador_cedulas_salariales` (bandas internas): **cruza perfecto con personas** por `nombre_categoria` -> compa-ratio.
 # MAGIC - `datos_de_mercado_sueldos` (benchmark tipo Mercer): referencia de mercado por puesto. **No** se une directo a personas.
 # MAGIC - `catalogo_puestos`: catalogo de puestos (se une a mercado por codigo, no a personas).
@@ -411,6 +412,65 @@ plt.show()
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ### Perfil objetivo del rol (perfiles_puesto_sucesion)
+# MAGIC 16 **perfiles de exito** de roles criticos. Es el **perfil
+# MAGIC objetivo** contra el que se compara un candidato. No hay llave dura a personas; el match se
+# MAGIC hace por semantica: `area_funcional` ≈ `grupo_area_funcional` y `capacidades_criticas` ≈
+# MAGIC competencias del `talent_grid` (misma familia tipo Korn Ferry). Ideal para un fit explicable
+# MAGIC con reglas o GenAI ("cumple X, le falta Y").
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC -- Perfil objetivo de un rol critico: que exige el puesto
+# MAGIC SELECT puesto, categoria_perfil, area_funcional, nivel_alcance,
+# MAGIC        objetivo_del_puesto, capacidades_criticas, experiencias_relevantes, req_must_have
+# MAGIC FROM perfiles_puesto_sucesion
+# MAGIC WHERE puesto = 'Jefe de Planta';
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC -- Catalogo de roles criticos disponibles (para elegir el perfil objetivo a analizar)
+# MAGIC SELECT categoria_perfil, COUNT(*) AS perfiles,
+# MAGIC        CONCAT_WS(' | ', COLLECT_LIST(puesto)) AS puestos
+# MAGIC FROM perfiles_puesto_sucesion
+# MAGIC GROUP BY categoria_perfil
+# MAGIC ORDER BY perfiles DESC;
+
+# COMMAND ----------
+
+# Fit candidato <-> perfil objetivo (esqueleto explicable para GenAI)
+# El perfil trae capacidades_criticas en texto; los candidatos traen percentiles por competencia.
+# Enfoque simple y transparente: recuperar el perfil objetivo y el pool de candidatos del area,
+# y pasar ambos a un modelo (ai_query / Foundation Model) para un ranking explicable.
+perfil_rol = spark.sql("""
+  SELECT puesto, area_funcional, capacidades_criticas, experiencias_relevantes, req_must_have
+  FROM perfiles_puesto_sucesion WHERE puesto = 'Jefe de Planta'
+""").first()
+
+candidatos = spark.sql("""
+  WITH latest AS (
+    SELECT id_colaborador, ID_Usuario_sin_prefijos, grupo_area_funcional, antiguedad
+    FROM tbl_mth_datalake_personas
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY id_colaborador ORDER BY fecha_de_cierre DESC) = 1
+  )
+  SELECT l.id_colaborador, l.grupo_area_funcional, l.antiguedad,
+         t.`2026_Readiness` AS readiness, t.`2026_Potential_Map` AS potencial,
+         g.strategic_mindset_percentil, g.drives_results_percentil,
+         g.builds_effective_teams_percentil, g.decision_quality_percentil
+  FROM latest l
+  LEFT JOIN tbl_wkly_talento t ON l.ID_Usuario_sin_prefijos = t.ID_Usuario_sin_prefijos
+  LEFT JOIN talent_grid g      ON l.id_colaborador = g.id_colaborador
+  WHERE l.grupo_area_funcional = 'SUPPLY CHAIN'
+    AND LOWER(TRIM(t.`2026_Readiness`)) LIKE 'ready now%'
+""")
+print("Perfil objetivo:", perfil_rol["puesto"] if perfil_rol else None)
+display(candidatos)
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## 7. Cruce integral (las tres tablas por la llave)
 # MAGIC
 # MAGIC Perfil + talento + clima en una sola vista. Base = `personas`, `LEFT JOIN` al resto.
@@ -442,12 +502,11 @@ plt.show()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 7b. Cruce clima + personas (reemplazo de `vw_sayit_personas`, que SERA ELIMINADA)
+# MAGIC ## 7b. Cruce clima + personas (por llave compuesta)
 # MAGIC
-# MAGIC Existia una vista `vw_sayit_personas` que cruzaba clima + personas por una **llave compuesta**
-# MAGIC (`id + mes + anio`), acotando personas a los cortes **Sep-2024** y **Jun-2025**. **El cliente
-# MAGIC la va a eliminar** (y hoy ademas falla, porque referencia `tbl_yr_sayit`, renombrada a
-# MAGIC `tbl_yl_sayit`). **No la uses**: replica el cruce directo sobre `tbl_yl_sayit`, como abajo.
+# MAGIC Para unir clima + personas, cruza por una **llave compuesta** (`id + mes + anio`), acotando
+# MAGIC personas a los cortes **Sep-2024** y **Jun-2025** (ediciones de la encuesta). Patron directo
+# MAGIC sobre `tbl_yl_sayit`:
 
 # COMMAND ----------
 

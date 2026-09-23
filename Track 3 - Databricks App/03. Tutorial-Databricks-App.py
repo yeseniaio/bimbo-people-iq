@@ -3,7 +3,7 @@
 # MAGIC # Tutorial: Crear una Databricks App - People AI Hackathon
 # MAGIC
 # MAGIC Como construir y desplegar una **Databricks App** en Python conectada a los datos de
-# MAGIC People / RRHH. Cubrimos **3 frameworks** con el mismo ejemplo concreto:
+# MAGIC People / Personas. Cubrimos **3 frameworks** con el mismo ejemplo concreto:
 # MAGIC un **Dashboard de Experiencia del Colaborador** (clima Say It + rotacion).
 # MAGIC
 # MAGIC | Framework | Perfil | Cuando usarlo |
@@ -66,7 +66,7 @@
 # MAGIC
 # MAGIC Solo datos **agregados** (sin PII). Filtra `scale='Likert'`.
 # MAGIC
-# MAGIC > **Otras ideas de app (dato 21-sep-2026):** compa-ratio salarial cruzando
+# MAGIC > **Otras ideas de app:** compa-ratio salarial cruzando
 # MAGIC > `tbl_mth_datalake_personas` con `tabulador_cedulas_salariales` por `nombre_categoria`;
 # MAGIC > tablero de competencias con `talent_grid` (+ `dim_talent_grid`); referencia de mercado
 # MAGIC > con `datos_de_mercado_sueldos`. Ver queries validadas en `02. Notebook-Ejemplo.py`.

@@ -3,11 +3,11 @@
 **Grupo Bimbo People AI Hackathon**
 
 Hackathon enfocado en Databricks, GenAI, Genie, AI/BI y Databricks Apps, aplicado a datos de
-**People / Recursos Humanos**.
+**People / Personas**.
 
 **Fecha:** 23-24 de septiembre de 2026
 **Plataforma:** Databricks Workspace (Sandbox) `https://adb-709692038187649.9.azuredatabricks.net`
-**Datos:** People / RRHH - **100% SIMULADOS (ficticios)**
+**Datos:** People / Personas - **100% SIMULADOS (ficticios)**
 **Objetivo del dia:** Demo funcional + presentacion (3 min de pitch)
 
 > ⚠️ **DATOS 100% SIMULADOS.** Todo el dato de este hackathon es **ficticio** — **NO es
@@ -19,17 +19,28 @@ Hackathon enfocado en Databricks, GenAI, Genie, AI/BI y Databricks Apps, aplicad
 
 ## Elige tu Track
 
-Tres tracks. Cada equipo elige **uno**. Los tres resuelven los mismos escenarios de negocio.
+Tres tracks principales. Cada equipo elige **uno**. Los tres resuelven los mismos escenarios de
+negocio (sobre dato **estructurado**, es decir tablas). Hay ademas un **track opcional** para
+quien trabaje con **documentos** (dato no estructurado).
 
 | Track | Para quien | Que construyes | Dificultad | Habilidades |
 |-------|-----------|----------------|------------|-------------|
-| **Track 1 - Genie Space** | Negocio, analistas | Un espacio conversacional que responde preguntas en lenguaje natural | Facil | Conocimiento del negocio. SQL opcional |
-| **Track 2 - AI/BI Dashboard** | Negocio, analistas | Un dashboard AI/BI interactivo con Q&A en lenguaje natural | Facil | Conocimiento del negocio. SQL basico |
-| **Track 3 - Databricks App** | Perfil tecnico | Una app desplegada en Databricks Apps | Medio | Python (basico-intermedio), SQL |
+| **Track 1 - Genie Space** | Negocio, analistas | Un espacio conversacional que responde preguntas en lenguaje natural | Estandar | Conocimiento del negocio. SQL opcional |
+| **Track 2 - AI/BI Dashboard** | Negocio, analistas | Un dashboard AI/BI interactivo con Q&A en lenguaje natural | Estandar | Conocimiento del negocio. SQL basico |
+| **Track 3 - Databricks App** | Perfil tecnico | Una app desplegada en Databricks Apps | Avanzado | Python (basico-intermedio), SQL |
+| **Track 4 - Knowledge Assistant** *(opcional)* | Negocio, analistas | Un "Ask HR" sobre **documentos** con Agent Bricks (Knowledge Assistant), con citas | Estandar | Conocimiento del negocio. Sin codigo |
 
 - **Track 1** entrega: Genie Space funcional con 5+ preguntas de ejemplo y demo en vivo.
 - **Track 2** entrega: AI/BI Dashboard publicado, conectado a los datos, con visualizaciones y Q&A.
 - **Track 3** entrega: App desplegada (Streamlit / Dash / Gradio) conectada a los datos.
+- **Track 4 (opcional)** entrega: Knowledge Assistant conectado a documentos en un Volumen de UC,
+  respondiendo 5+ preguntas con **citas** a la fuente.
+
+> ⚠️ **Track 4 solo aplica si usas datos NO estructurados (documentos: PDF, Word, etc.).** Encaja
+> en el **Escenario 1 (Biblioteca Virtual / Ask HR)** y, opcionalmente, en el **5 (Sucesion)** si
+> llega una "Carpeta Azul" narrativa. Requiere que **Agent Bricks** este habilitado en el
+> workspace y que haya **documentos cargados** (se aportan el dia del evento). Para dato en
+> tablas, usa Track 1/2/3. Detalle: [Track 4 - Knowledge Assistant (Opcional)/01. Guia-Knowledge-Assistant.md](Track%204%20-%20Knowledge%20Assistant%20%28Opcional%29/01.%20Guia-Knowledge-Assistant.md).
 
 ---
 
@@ -53,7 +64,7 @@ Detalle de cada escenario (problema, reto, preguntas de negocio, valor esperado)
 
 ## Los Datos
 
-Dataset **100% simulado** de People / RRHH en el catalogo `cat_poc_sandbox_peopleai`,
+Dataset **100% simulado** de People / Personas en el catalogo `cat_poc_sandbox_peopleai`,
 schema `hackaton_2026_people_ai`.
 
 **Tablas de personas:**
@@ -66,10 +77,11 @@ schema `hackaton_2026_people_ai`.
 | `tbl_yl_sayit` | Encuesta de clima "Say It" 2024/2025: favorabilidad por dimension |
 | `talent_grid` | Assessment de competencias, traits y drivers por colaborador |
 
-**Tablas de referencia (para comparar):**
+**Tablas de referencia (para comparar y enriquecer):**
 
 | Tabla | De que trata |
 |-------|--------------|
+| `perfiles_puesto_sucesion` | Perfiles de exito de 16 roles criticos (objetivo, KPIs, capacidades, requisitos). **Perfil objetivo para sucesion (Esc. 5)** |
 | `catalogo_puestos` | Catalogo global de puestos (familia, especialidad, nivel de carrera) |
 | `datos_de_mercado_sueldos` | Referencia de mercado: sueldo base y compensacion total |
 | `tabulador_cedulas_salariales` | Bandas salariales internas (minimo/medio/maximo) por categoria |
@@ -102,6 +114,11 @@ schema `hackaton_2026_people_ai`.
 | [Catalogo de Tablas](Track%203%20-%20Databricks%20App/01.%20Catalogo-Tablas.md) | Referencia tecnica completa de los datos |
 | [Notebook de Ejemplo](Track%203%20-%20Databricks%20App/02.%20Notebook-Ejemplo.py) | SQL y PySpark listos para ejecutar por escenario |
 | [Tutorial: Crear una Databricks App](Track%203%20-%20Databricks%20App/03.%20Tutorial-Databricks-App.py) | 3 frameworks (Streamlit, Dash, Gradio) con app.yaml y requirements |
+
+### Track 4 - Knowledge Assistant (opcional, solo para documentos)
+| Documento | Descripcion |
+|-----------|-------------|
+| [Guia de Knowledge Assistant](Track%204%20-%20Knowledge%20Assistant%20%28Opcional%29/01.%20Guia-Knowledge-Assistant.md) | Agent Bricks: "Ask HR" sobre documentos (dato no estructurado), paso a paso |
 
 ### General
 | Documento | Descripcion |
@@ -164,6 +181,8 @@ bimbo-people-iq/
 │   ├── 01. Catalogo-Tablas.md                  <- Referencia tecnica de los datos
 │   ├── 02. Notebook-Ejemplo.py
 │   └── 03. Tutorial-Databricks-App.py
+├── Track 4 - Knowledge Assistant (Opcional)/   <- OPCIONAL: solo si usas documentos (no estructurado)
+│   └── 01. Guia-Knowledge-Assistant.md
 │
 ├── Docs-Ejemplo (MUESTRAS)/                     <- MUESTRAS ficticias (formato de documentos)
 │
@@ -172,6 +191,4 @@ bimbo-people-iq/
 └── PRE-FLIGHT-CHECKLIST.md                      <- (interno) preparacion del evento
 ```
 
-> **Organizadores y coaches:** ver [OBJETIVOS-VALOR.md](OBJETIVOS-VALOR.md) (que deben lograr los
-> usuarios de negocio), [NOTAS-TECNICAS.md](NOTAS-TECNICAS.md) (reglas de datos y pendientes) y
-> [PRE-FLIGHT-CHECKLIST.md](PRE-FLIGHT-CHECKLIST.md) (estado de preparacion).
+

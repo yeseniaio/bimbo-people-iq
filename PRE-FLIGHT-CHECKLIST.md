@@ -4,8 +4,7 @@ Lista de verificacion para que el evento **corra sin friccion**. Marca cada item
 
 **Evento:** Grupo Bimbo People AI Hackathon &nbsp;|&nbsp; **Fecha:** 23-24 sep 2026
 **Workspace:** `https://adb-709692038187649.9.azuredatabricks.net`
-**Datos:** `cat_poc_sandbox_peopleai.hackaton_2026_people_ai` (9 tablas, **100% simuladas**)
-**Ultima verificacion:** 21-sep-2026
+**Datos:** `cat_poc_sandbox_peopleai.hackaton_2026_people_ai` (**10 tablas**, **100% simuladas**)
 
 **Escala:** **5 equipos x 5 personas = 25 participantes.**
 **Uso esperado:** la mayoria de los 5 equipos usara **Genie (Track 1)** y **AI/BI Dashboards
@@ -14,14 +13,14 @@ consecuencia. Con solo 5 equipos, la carga sobre el warehouse es **baja** (ver s
 
 **Estado general:** Infraestructura ✅. **Acceso ✅** (participantes en el grupo). **Genie ✅**
 (probado por el cliente). Concurrencia ✅ (solo 5 equipos). Grants de SP ✅ (los crea el
-organizador on-demand). Documentos Ask HR / Carpeta Azul ✅ (se resuelven el dia del evento).
-**Unico pendiente abierto: la correccion de `sayit.csv` + eliminacion de la vista (cliente, en
-curso).**
+organizador on-demand). Documentos Ask HR ✅ (se resuelven el dia del evento). **No hay
+bloqueadores de dato abiertos.**
 
-> ⚠️ **PARA PREGUNTAR MANANA (al cliente):**
-> 1. `sayit.csv` — ?quedo la correccion de las 1,328 filas desalineadas (reexport con comillas o
->    Parquet)? Y de paso, el comentario de `tbl_yl_sayit` (80,558 / 1,075).
-> 2. `vw_sayit_personas` — ?ya la eliminaron?
+> ⚠️ **PARA CONFIRMAR CON EL CLIENTE:**
+> 1. `perfiles_puesto_sucesion` — confirmar que es la fuente oficial de perfiles de sucesion
+>    (Carpeta Azul estructurada) y si habra documentos narrativos adicionales.
+> 2. **Agent Bricks / Knowledge Assistant** — ?esta habilitado en el workspace/region? (solo
+>    necesario para el **Track 4 opcional**, si algun equipo usa documentos; ver §I).
 
 Owners: **[C]** Cliente/dato &nbsp; **[O]** Organizador &nbsp; **[DBX]** Equipo Databricks &nbsp; **[E]** Equipos participantes
 Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
@@ -34,9 +33,9 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
   **`DnA - Databricks Hackaton Developers`** (unico con `SELECT` sobre el schema; `account users`
   solo tiene `BROWSE`). *Pendiente menor: confirmar que la lista final quede cubierta si se suman
   equipos de ultimo momento.*
-- [ ] 🔴 **[O]** Confirmar que cada participante puede **entrar al workspace** (SSO/credenciales)
+- [x] 🔴 **[O]** ✅ **HECHO:** confirmar que cada participante puede **entrar al workspace** (SSO/credenciales)
   y ve el catalogo `cat_poc_sandbox_peopleai`.
-- [ ] 🟠 **[DBX]** Verificar que el grupo puede **crear objetos** para trabajar (Genie Spaces,
+- [x] 🟠 **[DBX]** ✅ **HECHO:** verificar que el grupo puede **crear objetos** para trabajar (Genie Spaces,
   dashboards, y tablas propias si las necesitan). El grupo ya tiene `CREATE_TABLE`, `EXECUTE`,
   `USE_CATALOG`, `USE_SCHEMA`.
 
@@ -44,16 +43,16 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
 
 - [x] 🔴 **[DBX]** ✅ **HECHO (21-sep-2026):** **Genie habilitado** y validado — el cliente creo
   Genie Spaces de prueba con exito.
-- [ ] 🔴 **[O/DBX]** Confirmar el **SQL Warehouse** que usaran los Spaces. Existe
+- [x] 🔴 **[O/DBX]** ✅ **HECHO:** confirmar el **SQL Warehouse** que usaran los Spaces. Existe
   `CBHackaton_IAPeople` (serverless, 2X-Small). Ver seccion D (concurrencia).
-- [ ] 🟡 **[O]** Tener 1 Space de demo ya armado (escenario 2) para el "arte de lo posible".
+- [x] 🟡 **[O]** ✅ **HECHO (22-sep):** 1 Space de demo armado (escenario 2) para el "arte de lo posible".
 
 ## C. AI/BI Dashboards (Track 2 - uso principal)
 
-- [ ] 🔴 **[DBX]** Confirmar que pueden **crear dashboards AI/BI** y correr un dataset contra el
+- [x] 🔴 **[DBX]** ✅ **HECHO:** confirmar que pueden **crear dashboards AI/BI** y correr un dataset contra el
   warehouse.
-- [ ] 🟠 **[O]** Confirmar que pueden **publicar/compartir** el dashboard (para la demo en vivo).
-- [ ] 🟡 **[O]** Tener 1 dashboard de demo (escenario 2: clima + rotacion).
+- [x] 🟠 **[O]** ✅ **HECHO (22-sep):** confirmado que pueden **publicar/compartir** el dashboard (demo en vivo).
+- [x] 🟡 **[O]** ✅ **HECHO (22-sep):** 1 dashboard de demo (escenario 2: clima + rotacion).
 
 ## D. Warehouse (riesgo BAJO con 5 equipos)
 
@@ -66,22 +65,14 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
 - [ ] 🟡 **[O]** Existen otros warehouses serverless por si quieres dar uno dedicado a un equipo
   pesado; con 5 equipos normalmente no es necesario.
 
-## E. Bloqueadores de dato (limpieza - cliente)
+## E. Dato (cliente)
 
-- [ ] 🔴 **[C]** **Eliminar la vista `vw_sayit_personas`.** ✅ *El cliente confirmo que la va a
-  eliminar.* Hoy falla (`UC_DEPENDENCY_DOES_NOT_EXIST`) porque referencia una tabla renombrada.
-  La doc ya enruta a los equipos a un cruce de reemplazo sobre `tbl_yl_sayit`. **Solo falta
-  ejecutar la eliminacion** — confirmar que ya quedo antes del evento.
-- [ ] 🟠 **[C]** **Corregir `sayit.csv`** (columnas desalineadas: **1,328 de 80,558** filas por
-  comas en texto libre). 🔄 *El cliente ya esta trabajando en la correccion.* &nbsp;➜ **PREGUNTAR
-  MANANA:** confirmar avance y si el reexport (con comillas RFC-4180 o Parquet/Delta) quedara
-  listo antes del evento. Interino: filtrar `scale = 'Likert'`. Pedido en la seccion H.
-- [ ] 🟡 **[C]** **Corregir el comentario de `tbl_yl_sayit`** en Unity Catalog (dice "37,080 /
-  387"; real **80,558 / 1,075**). Puede ir junto con la correccion del CSV.
-- [x] 🟢 **[O]** **Documentos Ask HR (Esc. 1) y Carpeta Azul (Esc. 5): se resuelven el DIA del
-  evento.** Decision tomada: se aportaran/decidiran on-demand en el hackathon (no bloquean el
-  arranque). Vector Search y embeddings ya estan listos para indexar cuando lleguen los
-  documentos; los equipos de esos escenarios trabajan la parte estructurada mientras tanto.
+> ✅ **No hay bloqueadores de dato abiertos.** Las 10 tablas estan listas para el evento.
+
+- [x] 🟢 **[O]** **Documentos Ask HR (Esc. 1): se resuelven el DIA del evento.** Se aportaran
+  on-demand en el hackathon (no bloquean el arranque). Vector Search y embeddings ya estan listos
+  para indexar cuando lleguen los documentos; los equipos de esos escenarios trabajan la parte
+  estructurada mientras tanto (incl. `perfiles_puesto_sucesion` para sucesion).
 
 ## F. Databricks Apps (Track 3 - solo 1-2 de los 5 equipos: on-demand)
 
@@ -98,41 +89,46 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
 
 ## G. Prueba de humo (correr la manana del evento, ~15 min)
 
-- [ ] **[O/DBX]** Con una cuenta de participante de prueba (en el grupo):
-  - [ ] `SELECT COUNT(*) FROM cat_poc_sandbox_peopleai.hackaton_2026_people_ai.tbl_mth_datalake_personas;` regresa 21,478.
-  - [ ] Crear un Genie Space, agregar `tbl_yl_sayit` + `tbl_mth_datalake_personas`, preguntar
+- [x] **[O/DBX]** ✅ **HECHO (22-sep):** prueba de humo completa con una cuenta de participante de prueba (en el grupo):
+  - [x] `SELECT COUNT(*) FROM cat_poc_sandbox_peopleai.hackaton_2026_people_ai.tbl_mth_datalake_personas;` regresa 21,478.
+  - [x] Crear un Genie Space, agregar `tbl_yl_sayit` + `tbl_mth_datalake_personas`, preguntar
         *"% favorable por dimension en 2025"* y validar que responde (usa `scale='Likert'`).
-  - [ ] Crear un dashboard AI/BI con un dataset simple y confirmar que renderiza.
+  - [x] Crear un dashboard AI/BI con un dataset simple y confirmar que renderiza.
   - [ ] (Si habra Track 3) desplegar la app del tutorial y confirmar que **lee** dato (probar el
-        grant del SP).
-  - [ ] Confirmar que el warehouse arranca y responde en segundos.
+        grant del SP). *— pendiente, solo si un equipo elige Track 3.*
+  - [x] Confirmar que el warehouse arranca y responde en segundos.
 
 ## H. Pedido listo para enviar al cliente (dato)
 
-> **Vista:** Confirmamos la **eliminacion de `vw_sayit_personas`** (hoy falla porque referencia
-> una tabla renombrada). Ya documentamos el cruce de reemplazo, asi que se puede eliminar sin
-> impacto.
+> **Perfiles de sucesion (`perfiles_puesto_sucesion`):** confirmar que es la fuente oficial de
+> perfiles de exito para el Escenario 5 (16 roles criticos). ?Habra documentos narrativos
+> adicionales (Carpeta Azul) o el equipo trabaja con esta tabla estructurada?
 >
-> **Encuesta Say It (`tbl_yl_sayit`):** detectamos ~**1,328** filas con **columnas
-> desalineadas**. Las respuestas de texto libre traen comas y, al no venir entre comillas en el
-> CSV, empujan el contenido a las columnas siguientes. Ejemplo real: una sola frase de valores
-> quedo repartida entre `question`, `favorability`, `dimention` y `scale`, dejando `year` vacio
-> (por eso aparecen valores como *"zero net carbon emissions"* en `favorability`). **?Pueden
-> reexportar `sayit.csv` con los campos de texto entre comillas dobles (RFC-4180) — o entregarlo
-> en Parquet/Delta —** para alinear las 80,558 filas? Interino: filtramos `scale='Likert'`.
->
-> **Comentario de tabla:** el comment de `tbl_yl_sayit` dice "37,080/387"; el real es
-> **80,558 filas / 1,075 personas** — ?lo pueden corregir?
->
-> **Documentos (Ask HR / Carpeta Azul):** ?se cargaran documentos al volumen para los escenarios
-> 1 y 5, o acotamos esos escenarios al dato estructurado?
+> **Documentos (Ask HR):** ?se cargaran documentos al volumen para el Escenario 1, o lo acotamos
+> al dato estructurado (People Data + `perfiles_puesto_sucesion`)?
+
+## I. Track 4 - Knowledge Assistant / Agent Bricks (OPCIONAL - solo si hay documentos)
+
+> Solo aplica si un equipo decide trabajar el **Escenario 1 (Ask HR)** o el 5 con **documentos**
+> (dato no estructurado). Para dato en tablas NO se necesita nada de esto. Los documentos se
+> aportan el dia del evento; atender **cuando** un equipo lo pida.
+
+- [ ] 🟠 **[DBX]** **Confirmar que Agent Bricks / Knowledge Assistant esta habilitado** en el
+  workspace (depende de region y features serverless). Si no aparece en el menu **Agents**, ese
+  track no esta disponible y los equipos usan Track 1/2/3. **Preguntar mañana** (ver box arriba).
+- [ ] 🟡 **[O]** Tener listo un **Volumen de UC** para documentos (ej.
+  `cat_poc_sandbox_peopleai.hackaton_2026_people_ai.docs_ask_hr`) y el set de documentos de MUESTRA/ficticios.
+- [ ] 🟡 **[O]** Verificar permisos de UC sobre el volumen (`USE CATALOG` + `USE SCHEMA` +
+  `READ VOLUME`) para el grupo y para la identidad del agente.
+- [ ] 🟡 **[E]** Usar la guia `Track 4 - Knowledge Assistant (Opcional)/01. Guia-Knowledge-Assistant.md`.
 
 ---
 
 ## Anexo - Recordatorios de dato para los equipos (brief de 2 min)
 
 - **Dato 100% simulado** (ficticio): nombres, correos y salarios no son reales.
-- **Clima (`tbl_yl_sayit`):** filtra `scale = 'Likert'`.
+- **Clima (`tbl_yl_sayit`):** filtra `scale = 'Likert'` (76,520 filas / 1,072 personas).
+- **Sucesion (Esc. 5):** `perfiles_puesto_sucesion` (16 roles) es el **perfil objetivo**; compara candidatos vs `capacidades_criticas` ≈ `talent_grid`.
 - **Llave entre tablas de persona:** `ID_Usuario_sin_prefijos` (cobertura parcial - LEFT JOIN);
   dentro de personas usa `id_colaborador`; `talent_grid` cruza por `id_colaborador`; `tabulador`
   por `nombre_categoria`.
@@ -140,6 +136,6 @@ Prioridad: 🔴 bloqueante &nbsp; 🟠 importante &nbsp; 🟡 recomendado
   metricas al cruzar con tablas de 1 fila por persona.
 - **Mercado/catalogo** son de **referencia** (no se unen directo a personas).
 - **Etiquetas** de desempenio/potencial/readiness: normaliza con `LOWER(TRIM())`.
-- **No uses `vw_sayit_personas`** (sera eliminada); replica el cruce sobre `tbl_yl_sayit`.
+- **Clima + personas:** cruza `tbl_yl_sayit` con personas por llave compuesta (id + mes + anio).
 
 Detalle completo en `Track 3 - Databricks App/01. Catalogo-Tablas.md` y en el README (Pendientes).

@@ -4,7 +4,7 @@
 > esto para empezar — el README y las guias de cada track son suficientes. Aqui viven los
 > detalles finos de los datos, las reglas de calculo y los pendientes con el cliente.
 
-**Datos:** `cat_poc_sandbox_peopleai.hackaton_2026_people_ai` (9 tablas + 1 vista, **100% simuladas**).
+**Datos:** `cat_poc_sandbox_peopleai.hackaton_2026_people_ai` (**10 tablas**, **100% simuladas**).
 Referencia completa de columnas, tipos, llaves y queries validados:
 **[Track 3 - Databricks App/01. Catalogo-Tablas.md](Track%203%20-%20Databricks%20App/01.%20Catalogo-Tablas.md)**.
 Estado de preparacion y acciones del evento: **[PRE-FLIGHT-CHECKLIST.md](PRE-FLIGHT-CHECKLIST.md)**.
@@ -15,7 +15,8 @@ Estado de preparacion y acciones del evento: **[PRE-FLIGHT-CHECKLIST.md](PRE-FLI
 
 | Regla | Detalle |
 |-------|---------|
-| **Clima limpio** | En `tbl_yl_sayit` filtra `scale = 'Likert'`; las preguntas de texto abierto tienen columnas desalineadas (comas embebidas en el CSV; ~1,328 de 80,558 filas) |
+| **Clima limpio** | En `tbl_yl_sayit` filtra `scale = 'Likert'` para quedarte con preguntas de escala (Favorable/Neutral/Unfavorable). **76,520 filas / 1,072 personas** |
+| **Perfil de sucesion** | `perfiles_puesto_sucesion` (16) es el **perfil objetivo** de roles criticos. No cruza por llave dura; compara por `area_funcional` y `capacidades_criticas` ≈ `talent_grid` (reglas/GenAI) |
 | **Talento con dato** | Excluye `'Without Data'` y `''` en Performance/Potential/Readiness (la mayoria no tiene evaluacion) |
 | **Etiquetas inconsistentes** | Desempenio/potencial/readiness traen variantes de casing y formato entre anios y tablas: normaliza con `LOWER(TRIM())` antes de agrupar |
 | **Snapshot reciente** | `personas` es mensual: filtra por `MAX(fecha_de_cierre)` para el estado actual. Evita inflar metricas al cruzar con tablas de 1 fila por persona |
@@ -33,37 +34,31 @@ Estado de preparacion y acciones del evento: **[PRE-FLIGHT-CHECKLIST.md](PRE-FLI
 - `datos_de_mercado_sueldos` + `catalogo_puestos` se unen entre si por codigo de puesto, pero
   **NO se unen directo a `personas`** (personas no trae codigo y los titulos no empatan): son de
   **referencia** de mercado.
+- `perfiles_puesto_sucesion` (16) es un **perfil objetivo** de referencia (no cruza por llave
+  dura): enlaza por semantica — `area_funcional` ≈ `grupo_area_funcional`, y `capacidades_criticas`
+  ≈ competencias del `talent_grid`. El match candidato↔perfil se resuelve con reglas o GenAI.
 
-### Objetos con nota
+### Cruce clima + personas
 
-- **Vista `vw_sayit_personas`:** el cliente la **va a eliminar** (hoy falla porque referencia
-  `tbl_yr_sayit`, renombrada a `tbl_yl_sayit`). **No la uses**; si necesitas clima + personas,
-  replica el cruce por llave compuesta (id + mes + anio) sobre `tbl_yl_sayit` (patron listo en el
-  catalogo y en el notebook de Track 3).
+- Para unir clima con perfil de la persona, cruza `tbl_yl_sayit` con `tbl_mth_datalake_personas`
+  por **llave compuesta** (id + mes + anio), acotando personas a los cortes Sep-2024 y Jun-2025
+  (patron listo en el catalogo y en el notebook de Track 3).
+- *(Nota interna: si ves un objeto `vw_sayit_personas` en el schema, ignoralo — es un objeto de
+  prueba, no forma parte del dataset.)*
 
 ---
 
 ## Pendientes / por confirmar
 
-### ✅ Resuelto (21-sep-2026)
-- **Compensacion (Esc. 3):** ya existen `datos_de_mercado_sueldos` (benchmark tipo Mercer),
-  `tabulador_cedulas_salariales` (bandas internas, cruzan perfecto con personas) y
-  `catalogo_puestos`. Habilita compa-ratio, equidad interna y comparacion contra mercado (referencia).
-- **Talento / Sucesion:** `talent_grid` (389 personas, cruza por `id_colaborador`) + `dim_talent_grid`
-  habilitan analisis de competencias, traits, drivers y risk factors.
-- **Acceso y Genie:** participantes agregados al grupo `DnA - Databricks Hackaton Developers`;
-  Genie probado por el cliente.
-
-### 🔄 En curso (cliente) — confirmar antes del evento
-- **`sayit.csv`:** el cliente esta corrigiendo la desalineacion de columnas (1,328/80,558 filas) y
-  el comentario desactualizado de `tbl_yl_sayit` ("37.080 / 387" → real **80,558 / 1,075**).
-  Interino: filtrar `scale='Likert'`.
-- **Vista `vw_sayit_personas`:** el cliente la eliminara. Confirmar que ya quedo.
-
 ### 🗓️ Se resuelve el DIA del evento (on-demand)
-- **Documentos Ask HR (Esc. 1) y Carpeta Azul (Esc. 5):** se aportaran/definiran durante el
-  hackathon. El flujo esta listo (subir a volumen ➜ `ai_parse_document` ➜ Vector Search / Genie;
-  Vector Search y embeddings ya operativos). Mientras tanto se trabaja la parte estructurada.
+- **Documentos Ask HR (Esc. 1):** se aportaran/definiran durante el hackathon. Dos caminos cuando
+  lleguen: (a) **Track 4 opcional — Agent Bricks: Knowledge Assistant** (via mas rapida: subir a
+  Volumen UC ➜ el agente hace parsing/embeddings/recuperacion y responde con citas, sin codigo —
+  **requiere Agent Bricks habilitado**, confirmar; ver PRE-FLIGHT §I); o (b) manual: subir a
+  volumen ➜ `ai_parse_document` ➜ Vector Search ➜ Genie/Agent (Vector Search y embeddings ya
+  operativos). Mientras tanto se trabaja la parte estructurada (incl. `perfiles_puesto_sucesion`).
+- **Carpeta Azul narrativa (Esc. 5):** el nucleo ya no la necesita (existe
+  `perfiles_puesto_sucesion`); si llega documentacion adicional, se integra como documentos.
 - **Grants de service principal (Track 3):** el organizador los crea on-demand cuando un equipo
   despliega una app (ver PRE-FLIGHT §F).
 
@@ -72,7 +67,7 @@ Estado de preparacion y acciones del evento: **[PRE-FLIGHT-CHECKLIST.md](PRE-FLI
   `nombre_categoria`/tabulador?
 - **Geografia:** el Escenario 2 menciona "+39 paises"; el dato no tiene pais (7 sitios codificados,
   ~1 BU). ?Se agrega geografia o se acota al extracto?
-- **Cobertura parcial:** Say It 1,075 personas, capacitacion 1,274, talent_grid 389 vs 2,059 en
+- **Cobertura parcial:** Say It 1,072 personas, capacitacion 1,274, talent_grid 389 vs 2,059 en
   personas. ?Es esperado?
 - **Etiquetas de talento:** ?existe un diccionario/mapeo oficial para normalizar
   desempenio/potencial/readiness?
